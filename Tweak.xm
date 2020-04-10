@@ -94,6 +94,18 @@ static void PreferencesChangedCallback(CFNotificationCenterRef center, void *obs
   refreshPrefs();
 }
 
+static void StartCallback(CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo) {
+	if (enabled){
+		start_iokit();
+	}
+}
+
+static void StopCallback(CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo) {
+	if (enabled){
+		stop_iokit();
+	}
+}
+
 // Ambient Light Sensor
 void handle_event(void* target, void* refcon, IOHIDEventQueueRef queue, IOHIDEventRef event) {
 	if (IOHIDEventGetType(event) == kIOHIDEventTypeAmbientLightSensor) {
@@ -185,6 +197,8 @@ void stop_iokit() {
 // Tweak setup
 %ctor {
 	CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), NULL, (CFNotificationCallback) PreferencesChangedCallback, CFSTR("xyz.skitty.lightsout.prefschanged"), NULL, CFNotificationSuspensionBehaviorDeliverImmediately);
+	CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), NULL, (CFNotificationCallback) StartCallback, CFSTR("xyz.skitty.lightsout.start"), NULL, CFNotificationSuspensionBehaviorDeliverImmediately);
+	CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), NULL, (CFNotificationCallback) StopCallback, CFSTR("xyz.skitty.lightsout.stop"), NULL, CFNotificationSuspensionBehaviorDeliverImmediately);
 	refreshPrefs();
 
 	%init;
